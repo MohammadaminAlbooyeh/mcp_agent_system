@@ -1,0 +1,16 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and deploy
+        run: |
+          echo "Deployment steps would go here"
+          # docker build -t mcp-agent-system .
+          # docker push registry.example.com/mcp-agent-system
