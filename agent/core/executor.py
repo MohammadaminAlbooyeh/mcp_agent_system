@@ -12,19 +12,26 @@ class Executor:
         results = []
         for step in plan:
             result = await self._execute_step(step)
-            results.append(f"Step: {step['description']}\nResult: {result}")
+            description = step.get('description') if isinstance(step, dict) else str(step)
+            results.append(f"Step: {description}\nResult: {result}")
         return "\n\n".join(results)
 
     async def execute_tool(self, tool_name: str, params: dict = None) -> str:
         logger.info(f"Executing tool: {tool_name}")
         return await self.agent.mcp_client.call_tool(tool_name, params or {})
 
-    async def _execute_step(self, step: dict) -> str:
-        step["status"] = "in_progress"
+    async def _execute_step(self, step) -> str:
+        if isinstance(step, str):
+            step = {"description": step}
+        if isinstance(step, dict):
+            step["status"] = "in_progress"
         try:
-            result = await self.agent.reasoning.process(step["description"])
-            step["status"] = "completed"
+            description = step.get("description") if isinstance(step, dict) else step
+            result = await self.agent.reasoning.process(description)
+            if isinstance(step, dict):
+                step["status"] = "completed"
             return result
         except Exception as e:
-            step["status"] = "failed"
+            if isinstance(step, dict):
+                step["status"] = "failed"
             return f"Error: {e}"

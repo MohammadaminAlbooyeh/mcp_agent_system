@@ -1,11 +1,18 @@
 import os
+import httpx
 from openai import AsyncOpenAI
 
 
 class OpenAILLM:
     def __init__(self, config: dict = None):
         self.config = config or {}
-        self.client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        api_key = os.getenv("OPENAI_API_KEY")
+        try:
+            self.client = AsyncOpenAI(api_key=api_key)
+        except TypeError:
+            # Fallback for version compatibility issues with httpx
+            http_client = httpx.AsyncClient()
+            self.client = AsyncOpenAI(api_key=api_key, http_client=http_client)
         self.model = self.config.get("model", "gpt-4")
         self.temperature = self.config.get("temperature", 0.7)
 

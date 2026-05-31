@@ -13,11 +13,15 @@ class MCPClient:
         if transport == "stdio":
             from mcp.client.stdio import stdio_client
             from mcp import ClientSession, StdioServerParameters
-            params = StdioServerParameters(command=command or "python", args=["-m", "mcp_server.server"])
-            self.session = await stdio_client(params)
+            import sys
+            params = StdioServerParameters(command=command or sys.executable, args=["-m", "mcp_server.server"])
+            async with stdio_client(params) as (read_stream, write_stream):
+                self.session = ClientSession(read_stream, write_stream)
+                await self.session.initialize()
         elif transport == "http":
             from mcp.client.http import http_client
             self.session = await http_client(self.server_url or "http://localhost:8000")
+            await self.session.initialize()
         logger.info(f"MCP Client connected via {transport}")
 
     async def list_tools(self) -> list:
