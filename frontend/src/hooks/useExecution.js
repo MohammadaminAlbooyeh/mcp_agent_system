@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { api } from '../services/api';
 
 export function useExecution() {
   const [executions, setExecutions] = useState([]);
@@ -9,12 +10,7 @@ export function useExecution() {
     const results = [];
     for (const call of toolCalls) {
       try {
-        const response = await fetch('/api/executions/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(call),
-        });
-        const data = await response.json();
+        const data = await api.post('/executions/execute', call);
         results.push(data);
         setExecutions(prev => [...prev, data]);
       } catch (err) {

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../services/api';
+import { wsService } from '../services/websocket';
 
 function MonitoringPage() {
   const [metrics, setMetrics] = useState(null);
 
   useEffect(() => {
-    fetch('/api/monitoring/metrics')
-      .then(res => res.json())
-      .then(setMetrics)
-      .catch(console.error);
+    api.get('/monitoring/metrics').then(setMetrics).catch(console.error);
+    wsService.connect('/ws/monitoring');
+    wsService.on('metrics', (data) => setMetrics(data));
   }, []);
 
   return (

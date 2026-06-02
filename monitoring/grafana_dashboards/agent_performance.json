@@ -1,1 +1,65 @@
-{"title": "Agent Performance", "panels": []}
+{
+  "title": "Agent Performance",
+  "uid": "agent_performance",
+  "panels": [
+    {
+      "id": 1,
+      "type": "graph",
+      "title": "Task Completion Rate",
+      "targets": [
+        {
+          "expr": "rate(agent_tasks_completed_total[5m])",
+          "legendFormat": "Completed",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(agent_tasks_failed_total[5m])",
+          "legendFormat": "Failed",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Average Execution Time",
+      "targets": [
+        {
+          "expr": "avg(agent_task_duration_seconds)",
+          "legendFormat": "Avg Duration",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Total Tasks",
+      "targets": [
+        {
+          "expr": "sum(agent_tasks_completed_total)",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 }
+    },
+    {
+      "id": 4,
+      "type": "heatmap",
+      "title": "Execution Time Heatmap",
+      "targets": [
+        {
+          "expr": "agent_task_duration_seconds",
+          "legendFormat": "Duration",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

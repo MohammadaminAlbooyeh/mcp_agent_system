@@ -1,1 +1,60 @@
-{"title": "Tool Usage", "panels": []}
+{
+  "title": "Tool Usage",
+  "uid": "tool_usage",
+  "panels": [
+    {
+      "id": 1,
+      "type": "barchart",
+      "title": "Tool Calls by Type",
+      "targets": [
+        {
+          "expr": "sum by (tool) (rate(agent_tool_calls_total[5m]))",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Total Tool Calls",
+      "targets": [
+        {
+          "expr": "sum(agent_tool_calls_total)",
+          "legendFormat": "Total",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Tool Error Rates",
+      "targets": [
+        {
+          "expr": "sum by (tool) (rate(agent_tool_errors_total[5m]))",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Tool Usage Over Time",
+      "targets": [
+        {
+          "expr": "sum by (tool) (rate(agent_tool_calls_total[1m]))",
+          "legendFormat": "{{tool}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 }
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

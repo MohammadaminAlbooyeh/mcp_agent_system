@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ToolList from '../components/ToolList';
+import { useTools } from '../hooks/useTools';
 
 function ToolsPage() {
-  const [tools, setTools] = useState([]);
-
-  useEffect(() => {
-    fetch('/api/tools')
-      .then(res => res.json())
-      .then(setTools)
-      .catch(console.error);
-  }, []);
+  const { tools } = useTools();
 
   return (
     <div>

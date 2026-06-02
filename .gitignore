@@ -46,3 +46,7 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+
+# Runtime data
+memory_store.json
+*.db

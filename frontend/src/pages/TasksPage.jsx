@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import TaskCard from '../components/TaskCard';
+import { useTasks } from '../hooks/useTasks';
 
 function TasksPage() {
-  const [tasks, setTasks] = useState([]);
-
-  useEffect(() => {
-    fetch('/api/tasks')
-      .then(res => res.json())
-      .then(setTasks)
-      .catch(console.error);
-  }, []);
+  const { tasks, loading } = useTasks();
 
   return (
     <div>

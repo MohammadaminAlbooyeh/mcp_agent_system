@@ -1,1 +1,65 @@
-{"title": "Task Metrics", "panels": []}
+{
+  "title": "Task Metrics",
+  "uid": "task_metrics",
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Tasks Created vs Completed",
+      "targets": [
+        {
+          "expr": "rate(agent_tasks_created_total[5m])",
+          "legendFormat": "Created",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(agent_tasks_completed_total[5m])",
+          "legendFormat": "Completed",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "piechart",
+      "title": "Task Status Distribution",
+      "targets": [
+        {
+          "expr": "sum by (status) (agent_tasks_total)",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Success Rate",
+      "targets": [
+        {
+          "expr": "sum(agent_tasks_completed_total) / (sum(agent_tasks_completed_total) + sum(agent_tasks_failed_total)) * 100",
+          "legendFormat": "Success %",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 }
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Recent Tasks",
+      "targets": [
+        {
+          "expr": "agent_tasks_total",
+          "legendFormat": "__auto",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

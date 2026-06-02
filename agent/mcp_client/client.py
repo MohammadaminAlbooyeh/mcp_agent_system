@@ -8,6 +8,10 @@ class MCPClient:
         self.server_url = server_url
         self.session = None
         self._tools_cache = []
+        self._stdio_transport = None
+        self._session_cm = None
+        self._read_stream = None
+        self._write_stream = None
 
     async def connect(self, transport: str = "stdio", command: str = None):
         if transport == "stdio":
@@ -15,9 +19,11 @@ class MCPClient:
             from mcp import ClientSession, StdioServerParameters
             import sys
             params = StdioServerParameters(command=command or sys.executable, args=["-m", "mcp_server.server"])
-            async with stdio_client(params) as (read_stream, write_stream):
-                self.session = ClientSession(read_stream, write_stream)
-                await self.session.initialize()
+            self._stdio_transport = stdio_client(params)
+            self._read_stream, self._write_stream = await self._stdio_transport.__aenter__()
+            self._session_cm = ClientSession(self._read_stream, self._write_stream)
+            self.session = await self._session_cm.__aenter__()
+            await self.session.initialize()
         elif transport == "http":
             from mcp.client.http import http_client
             self.session = await http_client(self.server_url or "http://localhost:8000")
@@ -44,6 +50,13 @@ class MCPClient:
         return result
 
     async def close(self):
+        if self._session_cm:
+            await self._session_cm.__aexit__(None, None, None)
+            self._session_cm = None
+        if self._stdio_transport:
+            await self._stdio_transport.__aexit__(None, None, None)
+            self._stdio_transport = None
         if self.session:
             await self.session.close()
-            logger.info("MCP Client disconnected")
+            self.session = None
+        logger.info("MCP Client disconnected")
