@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Agent System - Project Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.05em;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .tree-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow-x: auto;
+        }
+
+        .tree {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .tree-item {
+            display: flex;
+            align-items: center;
+            padding: 2px 0;
+        }
+
+        .tree-icon {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            margin-right: 5px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tree-icon:hover {
+            color: #764ba2;
+        }
+
+        .toggle {
+            display: none;
+        }
+
+        .toggle:checked ~ .children {
+            display: block;
+        }
+
+        .toggle:checked ~ .tree-icon::before {
+            content: "▼ ";
+        }
+
+        .tree-icon::before {
+            content: "▶ ";
+        }
+
+        .children {
+            display: none;
+            margin-left: 20px;
+            border-left: 2px solid #e0e0e0;
+            padding-left: 10px;
+        }
+
+        .tree-icon.file::before {
+            content: "📄 ";
+        }
+
+        .tree-icon.folder::before {
+            content: "📁 ";
+        }
+
+        .tree-icon.folder-expanded::before {
+            content: "📂 ";
+        }
+
+        .folder-name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .file-name {
+            color: #333;
+        }
+
+        .file-type {
+            font-size: 0.85em;
+            color: #999;
+            margin-left: 10px;
+        }
+
+        .legend {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-icon {
+            font-size: 1.2em;
+        }
+
+        .legend-text {
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #1565c0;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .tree-container {
+                padding: 20px;
+                font-size: 12px;
+            }
+
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .expand-all, .collapse-all {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            margin-right: 10px;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .expand-all:hover, .collapse-all:hover {
+            background: #764ba2;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 Project Structure Visualization</h1>
+            <p class="subtitle">MCP Agent System - Complete Directory Hierarchy</p>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">38+</div>
+                    <div class="stat-label">Directories</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">200+</div>
+                    <div class="stat-label">Files</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Core Modules</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Tools</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tree-container">
+            <div class="info-box">
+                <strong>💡 Tip:</strong> Click the arrows to expand/collapse folders. Use the buttons below to expand or collapse all directories at once.
+            </div>
+
+            <div class="button-group">
+                <button class="expand-all" onclick="expandAll()">📂 Expand All</button>
+                <button class="collapse-all" onclick="collapseAll()">📁 Collapse All</button>
+            </div>
+
+            <pre class="tree" id="treeStructure">mcp_agent_system/
+<span class="toggle" id="toggle-root"></span><label for="toggle-root" class="tree-icon folder"></label><span class="folder-name">root directory</span>
+
+<span class="children" style="display: none;">
+├── <span class="tree-icon file"></span><span class="file-name">README.md</span> <span class="file-type">(Main documentation)</span>
+├── <span class="tree-icon file"></span><span class="file-name">LICENSE</span> <span class="file-type">(MIT License)</span>
+├── <span class="tree-icon file"></span><span class="file-name">CONTRIBUTING.md</span> <span class="file-type">(Guidelines)</span>
+├── <span class="tree-icon file"></span><span class="file-name">setup.py</span> <span class="file-type">(Package config)</span>
+├── <span class="tree-icon file"></span><span class="file-name">requirements.txt</span> <span class="file-type">(Dependencies)</span>
+├── <span class="tree-icon file"></span><span class="file-name">Dockerfile</span>
+├── <span class="tree-icon file"></span><span class="file-name">docker-compose.yml</span>
+├── <span class="tree-icon file"></span><span class="file-name">Makefile</span>
+├── <span class="tree-icon file"></span><span class="file-name">.env.example</span>
+│
+├── <span class="toggle" id="toggle-config"></span><label for="toggle-config" class="tree-icon folder"></label><span class="folder-name">config/</span>
+<span class="children" style="display: none;">
+│   ├── settings.yaml
+│   ├── logging.yaml
+│   ├── database.yaml
+│   └── llm_providers.yaml
+</span>
+│
+├── <span class="toggle" id="toggle-agent"></span><label for="toggle-agent" class="tree-icon folder"></label><span class="folder-name">agent/</span> <span class="file-type">⭐ AI Agent Core</span>
+<span class="children" style="display: none;">
+│   ├── <span class="tree-icon file"></span><span class="file-name">__init__.py</span>
+│   │
+│   ├── <span class="toggle" id="toggle-agent-core"></span><label for="toggle-agent-core" class="tree-icon folder"></label><span class="folder-name">core/</span> <span class="file-type">(Orchestration)</span>
+<span class="children" style="display: none;">
+│   │   ├── agent.py
+│   │   ├── executor.py
+│   │   ├── planner.py
+│   │   └── state.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-agent-reasoning"></span><label for="toggle-agent-reasoning" class="tree-icon folder"></label><span class="folder-name">reasoning/</span> <span class="file-type">(ReAct Loop)</span>
+<span class="children" style="display: none;">
+│   │   ├── react.py
+│   │   ├── chain_of_thought.py
+│   │   ├── reflection.py
+│   │   └── strategies.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-agent-memory"></span><label for="toggle-agent-memory" class="tree-icon folder"></label><span class="folder-name">memory/</span> <span class="file-type">(Dual-layer)</span>
+<span class="children" style="display: none;">
+│   │   ├── memory_manager.py
+│   │   ├── short_term.py
+│   │   ├── long_term.py
+│   │   ├── semantic_search.py
+│   │   └── consolidation.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-agent-llm"></span><label for="toggle-agent-llm" class="tree-icon folder"></label><span class="folder-name">llm/</span> <span class="file-type">(LLM Integration)</span>
+<span class="children" style="display: none;">
+│   │   ├── llm_client.py
+│   │   ├── openai_client.py
+│   │   ├── claude_client.py
+│   │   ├── groq_client.py
+│   │   └── local_client.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-agent-mcp"></span><label for="toggle-agent-mcp" class="tree-icon folder"></label><span class="folder-name">mcp_client/</span> <span class="file-type">(Protocol Client)</span>
+<span class="children" style="display: none;">
+│   │   ├── client.py
+│   │   ├── protocol.py
+│   │   ├── session.py
+│   │   └── discovery.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-agent-workflows"></span><label for="toggle-agent-workflows" class="tree-icon folder"></label><span class="folder-name">workflows/</span> <span class="file-type">(Task Templates)</span>
+<span class="children" style="display: none;">
+│   │   ├── base_workflow.py
+│   │   ├── research_workflow.py
+│   │   ├── analysis_workflow.py
+│   │   ├── code_workflow.py
+│   │   └── integration_workflow.py
+</span>
+│   │
+│   └── <span class="toggle" id="toggle-agent-utils"></span><label for="toggle-agent-utils" class="tree-icon folder"></label><span class="folder-name">utils/</span>
+<span class="children" style="display: none;">
+│       ├── logging.py
+│       ├── validators.py
+│       ├── converters.py
+│       └── helpers.py
+</span>
+│
+├── <span class="toggle" id="toggle-mcp"></span><label for="toggle-mcp" class="tree-icon folder"></label><span class="folder-name">mcp_server/</span> <span class="file-type">⭐ MCP Protocol Server</span>
+<span class="children" style="display: none;">
+│   ├── <span class="tree-icon file"></span><span class="file-name">server.py</span>
+│   │
+│   ├── <span class="toggle" id="toggle-mcp-tools"></span><label for="toggle-mcp-tools" class="tree-icon folder"></label><span class="folder-name">tools/</span> <span class="file-type">(15+ Tools)</span>
+<span class="children" style="display: none;">
+│   │   ├── web_tools.py
+│   │   ├── database_tools.py
+│   │   ├── file_tools.py
+│   │   ├── email_tools.py
+│   │   ├── code_tools.py
+│   │   └── utility_tools.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-mcp-handlers"></span><label for="toggle-mcp-handlers" class="tree-icon folder"></label><span class="folder-name">handlers/</span>
+<span class="children" style="display: none;">
+│   │   ├── tool_handler.py
+│   │   ├── resource_handler.py
+│   │   └── prompt_handler.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-mcp-resources"></span><label for="toggle-mcp-resources" class="tree-icon folder"></label><span class="folder-name">resources/</span>
+<span class="children" style="display: none;">
+│   │   ├── web_resources.py
+│   │   ├── db_resources.py
+│   │   └── code_resources.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-mcp-prompts"></span><label for="toggle-mcp-prompts" class="tree-icon folder"></label><span class="folder-name">prompts/</span>
+<span class="children" style="display: none;">
+│   │   ├── system_prompt.txt
+│   │   ├── tool_prompt.txt
+│   │   ├── examples.txt
+│   │   └── constraints.txt
+</span>
+│   │
+│   └── <span class="toggle" id="toggle-mcp-utils"></span><label for="toggle-mcp-utils" class="tree-icon folder"></label><span class="folder-name">utils/</span>
+<span class="children" style="display: none;">
+│       ├── validators.py
+│       ├── serializers.py
+│       └── error_handlers.py
+</span>
+│
+├── <span class="toggle" id="toggle-backend"></span><label for="toggle-backend" class="tree-icon folder"></label><span class="folder-name">backend/</span> <span class="file-type">⭐ FastAPI REST API</span>
+<span class="children" style="display: none;">
+│   ├── <span class="tree-icon file"></span><span class="file-name">main.py</span>
+│   │
+│   ├── <span class="toggle" id="toggle-backend-api"></span><label for="toggle-backend-api" class="tree-icon folder"></label><span class="folder-name">api/</span>
+<span class="children" style="display: none;">
+│   │   ├── <span class="toggle" id="toggle-backend-api-v1"></span><label for="toggle-backend-api-v1" class="tree-icon folder"></label><span class="folder-name">v1/</span>
+<span class="children" style="display: none;">
+│   │   │   ├── tasks.py
+│   │   │   ├── agents.py
+│   │   │   ├── tools.py
+│   │   │   ├── memory.py
+│   │   │   ├── metrics.py
+│   │   │   └── health.py
+</span>
+│   │   ├── websocket.py
+│   │   ├── middleware.py
+│   │   └── dependencies.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-backend-models"></span><label for="toggle-backend-models" class="tree-icon folder"></label><span class="folder-name">models/</span> <span class="file-type">(Pydantic)</span>
+<span class="children" style="display: none;">
+│   │   ├── task.py
+│   │   ├── agent.py
+│   │   ├── tool.py
+│   │   ├── memory.py
+│   │   └── responses.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-backend-services"></span><label for="toggle-backend-services" class="tree-icon folder"></label><span class="folder-name">services/</span> <span class="file-type">(Business Logic)</span>
+<span class="children" style="display: none;">
+│   │   ├── task_service.py
+│   │   ├── agent_service.py
+│   │   ├── tool_service.py
+│   │   ├── memory_service.py
+│   │   └── monitoring_service.py
+</span>
+│   │
+│   ├── <span class="toggle" id="toggle-backend-database"></span><label for="toggle-backend-database" class="tree-icon folder"></label><span class="folder-name">database/</span>
+<span class="children" style="display: none;">
+│   │   ├── connection.py
+│   │   ├── models.py
+│   │   ├── migrations/
+│   │   └── schemas.py
+</span>
+│   │
+│   └── <span class="toggle" id="toggle-backend-utils"></span><label for="toggle-backend-utils" class="tree-icon folder"></label><span class="folder-name">utils/</span>
+<span class="children" style="display: none;">
+│       ├── authentication.py
+│       ├── validators.py
+│       ├── decorators.py
+│       └── helpers.py
+</span>
+│
+├── <span class="toggle" id="toggle-frontend"></span><label for="toggle-frontend" class="tree-icon folder"></label><span class="folder-name">frontend/</span> <span class="file-type">⭐ React Dashboard</span>
+<span class="children" style="display: none;">
+│   ├── <span class="tree-icon file"></span><span class="file-name">vite.config.ts</span>
+│   ├── public/
+│   │   ├── index.html
+│   │   └── manifest.json
+│   │
+│   └── <span class="toggle" id="toggle-frontend-src"></span><label for="toggle-frontend-src" class="tree-icon folder"></label><span class="folder-name">src/</span>
+<span class="children" style="display: none;">
+│       ├── <span class="tree-icon file"></span><span class="file-name">App.tsx</span>
+│       ├── <span class="toggle" id="toggle-frontend-pages"></span><label for="toggle-frontend-pages" class="tree-icon folder"></label><span class="folder-name">pages/</span>
+<span class="children" style="display: none;">
+│       │   ├── Dashboard.tsx
+│       │   ├── Tasks.tsx
+│       │   ├── Monitoring.tsx
+│       │   ├── Agents.tsx
+│       │   ├── Tools.tsx
+│       │   └── Settings.tsx
+</span>
+│       ├── <span class="toggle" id="toggle-frontend-components"></span><label for="toggle-frontend-components" class="tree-icon folder"></label><span class="folder-name">components/</span>
+<span class="children" style="display: none;">
+│       │   ├── TaskCard.tsx
+│       │   ├── AgentStatus.tsx
+│       │   ├── ToolList.tsx
+│       │   ├── MemoryBrowser.tsx
+│       │   ├── MetricsChart.tsx
+│       │   └── Layout.tsx
+</span>
+│       ├── <span class="toggle" id="toggle-frontend-hooks"></span><label for="toggle-frontend-hooks" class="tree-icon folder"></label><span class="folder-name">hooks/</span>
+<span class="children" style="display: none;">
+│       │   ├── useAgent.ts
+│       │   ├── useTasks.ts
+│       │   ├── useWebSocket.ts
+│       │   └── useMetrics.ts
+</span>
+│       ├── <span class="toggle" id="toggle-frontend-services"></span><label for="toggle-frontend-services" class="tree-icon folder"></label><span class="folder-name">services/</span>
+<span class="children" style="display: none;">
+│       │   ├── api.ts
+│       │   ├── taskService.ts
+│       │   ├── agentService.ts
+│       │   └── metricsService.ts
+</span>
+│       ├── <span class="toggle" id="toggle-frontend-types"></span><label for="toggle-frontend-types" class="tree-icon folder"></label><span class="folder-name">types/</span>
+<span class="children" style="display: none;">
+│       │   ├── agent.ts
+│       │   ├── task.ts
+│       │   └── api.ts
+</span>
+│       ├── <span class="toggle" id="toggle-frontend-styles"></span><label for="toggle-frontend-styles" class="tree-icon folder"></label><span class="folder-name">styles/</span>
+<span class="children" style="display: none;">
+│       │   ├── globals.css
+│       │   └── components.css
+</span>
+│       └── <span class="toggle" id="toggle-frontend-utils"></span><label for="toggle-frontend-utils" class="tree-icon folder"></label><span class="folder-name">utils/</span>
+<span class="children" style="display: none;">
+│           ├── formatters.ts
+│           └── helpers.ts
+</span>
+│
+├── <span class="toggle" id="toggle-monitoring"></span><label for="toggle-monitoring" class="tree-icon folder"></label><span class="folder-name">monitoring/</span> <span class="file-type">📊 Observability</span>
+<span class="children" style="display: none;">
+│   ├── <span class="toggle" id="toggle-monitoring-prom"></span><label for="toggle-monitoring-prom" class="tree-icon folder"></label><span class="folder-name">prometheus/</span>
+<span class="children" style="display: none;">
+│   │   └── prometheus.yml
+</span>
+│   ├── <span class="toggle" id="toggle-monitoring-grafana"></span><label for="toggle-monitoring-grafana" class="tree-icon folder"></label><span class="folder-name">grafana_dashboards/</span>
+<span class="children" style="display: none;">
+│   │   ├── agent_metrics.json
+│   │   ├── api_performance.json
+│   │   ├── system_health.json
+│   │   └── tool_usage.json
+</span>
+│   └── <span class="toggle" id="toggle-monitoring-alerts"></span><label for="toggle-monitoring-alerts" class="tree-icon folder"></label><span class="folder-name">alerts/</span>
+<span class="children" style="display: none;">
+│       └── rules.yml
+</span>
+│
+├── <span class="toggle" id="toggle-docs"></span><label for="toggle-docs" class="tree-icon folder"></label><span class="folder-name">docs/</span> <span class="file-type">📚 Documentation</span>
+<span class="children" style="display: none;">
+│   ├── README.md
+│   ├── QUICKSTART.md
+│   ├── ARCHITECTURE.md
+│   ├── ARCHITECTURE_DIAGRAM.html
+│   ├── PROJECT_STRUCTURE.md
+│   ├── STRUCTURE_VISUAL.html
+│   ├── MCP_GUIDE.md
+│   ├── AGENT_GUIDE.md
+│   ├── TOOLS_GUIDE.md
+│   ├── RESOURCES_GUIDE.md
+│   ├── SERVER_GUIDE.md
+│   ├── API_REFERENCE.md
+│   ├── DEPLOYMENT.md
+│   ├── TROUBLESHOOTING.md
+│   └── images/
+</span>
+│
+├── <span class="toggle" id="toggle-tests"></span><label for="toggle-tests" class="tree-icon folder"></label><span class="folder-name">tests/</span> <span class="file-type">🧪 Test Suites</span>
+<span class="children" style="display: none;">
+│   ├── <span class="tree-icon file"></span><span class="file-name">conftest.py</span>
+│   │
+│   ├── <span class="toggle" id="toggle-tests-unit"></span><label for="toggle-tests-unit" class="tree-icon folder"></label><span class="folder-name">unit/</span>
+<span class="children" style="display: none;">
+│   │   ├── test_agent.py
+│   │   ├── test_reasoning.py
+│   │   ├── test_memory.py
+│   │   ├── test_llm_client.py
+│   │   ├── test_mcp_client.py
+│   │   ├── test_tools.py
+│   │   └── test_api.py
+</span>
+│   ├── <span class="toggle" id="toggle-tests-integration"></span><label for="toggle-tests-integration" class="tree-icon folder"></label><span class="folder-name">integration/</span>
+<span class="children" style="display: none;">
+│   │   ├── test_agent_flow.py
+│   │   ├── test_mcp_integration.py
+│   │   ├── test_api_integration.py
+│   │   ├── test_database.py
+│   │   └── test_cache.py
+</span>
+│   └── <span class="toggle" id="toggle-tests-load"></span><label for="toggle-tests-load" class="tree-icon folder"></label><span class="folder-name">load/</span>
+<span class="children" style="display: none;">
+│       ├── conftest.py
+│       ├── test_concurrent_tasks.py
+│       ├── test_api_load.py
+│       └── test_agent_load.py
+</span>
+│
+├── <span class="toggle" id="toggle-notebooks"></span><label for="toggle-notebooks" class="tree-icon folder"></label><span class="folder-name">notebooks/</span> <span class="file-type">📓 Jupyter Notebooks</span>
+<span class="children" style="display: none;">
+│   ├── agent_tutorial.ipynb
+│   ├── tool_exploration.ipynb
+│   ├── memory_analysis.ipynb
+│   ├── performance_profiling.ipynb
+│   └── examples/
+</span>
+│
+├── <span class="toggle" id="toggle-examples"></span><label for="toggle-examples" class="tree-icon folder"></label><span class="folder-name">examples/</span> <span class="file-type">💾 Usage Examples</span>
+<span class="children" style="display: none;">
+│   ├── <span class="toggle" id="toggle-examples-basic"></span><label for="toggle-examples-basic" class="tree-icon folder"></label><span class="folder-name">basic/</span>
+<span class="children" style="display: none;">
+│   │   ├── simple_task.py
+│   │   ├── web_search.py
+│   │   └── database_query.py
+</span>
+│   ├── <span class="toggle" id="toggle-examples-advanced"></span><label for="toggle-examples-advanced" class="tree-icon folder"></label><span class="folder-name">advanced/</span>
+<span class="children" style="display: none;">
+│   │   ├── research_workflow.py
+│   │   ├── data_analysis.py
+│   │   ├── code_generation.py
+│   │   └── custom_tools.py
+</span>
+│   └── <span class="toggle" id="toggle-examples-workflows"></span><label for="toggle-examples-workflows" class="tree-icon folder"></label><span class="folder-name">workflows/</span>
+<span class="children" style="display: none;">
+│       ├── market_research.py
+│       ├── document_analysis.py
+│       ├── api_integration.py
+│       └── report_generation.py
+</span>
+│
+├── <span class="toggle" id="toggle-scripts"></span><label for="toggle-scripts" class="tree-icon folder"></label><span class="folder-name">scripts/</span> <span class="file-type">🔧 Utility Scripts</span>
+<span class="children" style="display: none;">
+│   ├── setup_database.py
+│   ├── seed_data.py
+│   ├── migrate_data.py
+│   ├── backup_database.py
+│   ├── performance_test.py
+│   ├── docker_build.sh
+│   └── deploy.sh
+</span>
+│
+└── <span class="toggle" id="toggle-github"></span><label for="toggle-github" class="tree-icon folder"></label><span class="folder-name">.github/</span> <span class="file-type">GitHub Configuration</span>
+<span class="children" style="display: none;">
+    ├── <span class="toggle" id="toggle-github-workflows"></span><label for="toggle-github-workflows" class="tree-icon folder"></label><span class="folder-name">workflows/</span>
+<span class="children" style="display: none;">
+    │   ├── tests.yml
+    │   ├── deploy.yml
+    │   └── codeql.yml
+</span>
+    └── <span class="toggle" id="toggle-github-templates"></span><label for="toggle-github-templates" class="tree-icon folder"></label><span class="folder-name">ISSUE_TEMPLATE/</span>
+<span class="children" style="display: none;">
+        ├── bug_report.md
+        ├── feature_request.md
+        └── documentation.md
+</span>
+</span></pre>
+
+            <div class="legend">
+                <div class="legend-title">📖 Legend & Color Coding</div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="legend-icon">📁</span>
+                        <span class="legend-text">Directory (Collapsed)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon">📂</span>
+                        <span class="legend-text">Directory (Expanded)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon">📄</span>
+                        <span class="legend-text">File</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon">⭐</span>
+                        <span class="legend-text">Core Module</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon">📚</span>
+                        <span class="legend-text">Documentation</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-icon">🧪</span>
+                        <span class="legend-text">Testing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Connect toggles to their corresponding children
+            document.querySelectorAll('.toggle').forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    const icon = this.nextElementSibling;
+                    if (icon && icon.classList.contains('tree-icon')) {
+                        if (this.checked) {
+                            icon.classList.add('folder-expanded');
+                        } else {
+                            icon.classList.remove('folder-expanded');
+                        }
+                    }
+                });
+            });
+
+            function expandAll() {
+                document.querySelectorAll('.toggle').forEach(toggle => {
+                    toggle.checked = true;
+                    const icon = toggle.nextElementSibling;
+                    if (icon && icon.classList.contains('tree-icon')) {
+                        icon.classList.add('folder-expanded');
+                    }
+                });
+            }
+
+            function collapseAll() {
+                document.querySelectorAll('.toggle').forEach(toggle => {
+                    toggle.checked = false;
+                    const icon = toggle.nextElementSibling;
+                    if (icon && icon.classList.contains('tree-icon')) {
+                        icon.classList.remove('folder-expanded');
+                    }
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>
