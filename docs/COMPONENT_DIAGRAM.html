@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Agent System - Component Interaction Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .diagram-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+        }
+
+        .diagram-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+        }
+
+        .diagram-title-desc {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .component-item {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .component-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .component-item h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .component-item p {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .component-features {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .component-features li {
+            color: #666;
+            padding: 3px 0;
+            font-size: 0.9em;
+            margin-left: 15px;
+            position: relative;
+        }
+
+        .component-features li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .info-section {
+            background: #e3f2fd;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            color: #1565c0;
+        }
+
+        .info-section strong {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .info-section ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .info-section li {
+            margin: 5px 0;
+        }
+
+        .legend {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .legend h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            gap: 10px;
+            align-items: start;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .legend-text {
+            flex: 1;
+        }
+
+        .legend-text strong {
+            color: #333;
+            display: block;
+        }
+
+        .legend-text p {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 3px;
+        }
+
+        .flow-description {
+            background: #fff3e0;
+            border: 1px solid #ffe0b2;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #e65100;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .diagram-card {
+                padding: 20px;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Component Interactions & Data Flow</h1>
+            <p class="subtitle">MCP Agent System - Module Communication & Relationships</p>
+        </div>
+
+        <!-- Agent Core to MCP Server -->
+        <div class="diagram-card">
+            <h2>1️⃣ Agent ↔ MCP Server Communication</h2>
+            <p class="diagram-title-desc">Shows how the agent discovers and invokes tools through the MCP protocol</p>
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Agent as Agent Core
+                    participant Reasoning as Reasoning Engine
+                    participant MCPClient as MCP Client
+                    participant MCPServer as MCP Server
+                    participant Tools as Tools
+
+                    Agent->>Reasoning: Execute Task
+                    loop Reasoning Loop
+                        Reasoning->>MCPClient: Discover Tools
+                        MCPClient->>MCPServer: Get Tool List
+                        MCPServer-->>MCPClient: Tool Definitions
+                        MCPClient-->>Reasoning: Available Tools
+
+                        Reasoning->>MCPClient: Invoke Tool(params)
+                        MCPClient->>MCPServer: Tool Request
+                        MCPServer->>Tools: Execute
+                        Tools-->>MCPServer: Tool Result
+                        MCPServer-->>MCPClient: Response
+                        MCPClient-->>Reasoning: Tool Output
+
+                        Reasoning->>Agent: Update State
+                    end
+
+                    Agent-->>Agent: Final Output
+            </div>
+            <div class="info-section">
+                <strong>Key Points:</strong>
+                <ul>
+                    <li>MCP protocol enables tool discovery and dynamic capability advertisement</li>
+                    <li>Tools are decoupled from agent logic through the protocol</li>
+                    <li>Supports adding new tools without modifying agent code</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Agent Lifecycle -->
+        <div class="diagram-card">
+            <h2>2️⃣ Agent Execution Lifecycle</h2>
+            <p class="diagram-title-desc">Complete flow from task submission through result delivery</p>
+            <div class="mermaid">
+                graph TB
+                    INIT["🎯 Initialize Agent<br/>Load config & state"]
+                    PLAN["📋 Plan Task<br/>Break down objectives"]
+                    EXECUTE["⚙️ Execute Actions<br/>Run tools"]
+                    UPDATE["💾 Update Memory<br/>Store context"]
+                    REASON["🧠 Reason<br/>Analyze results"]
+                    CHECK{"Goal<br/>Achieved?"}
+                    REFLECT["🔄 Reflect<br/>Self-assessment"]
+                    FINALIZE["✅ Finalize<br/>Generate output"]
+                    RETURN["📤 Return Result"]
+
+                    INIT --> PLAN
+                    PLAN --> EXECUTE
+                    EXECUTE --> UPDATE
+                    UPDATE --> REASON
+                    REASON --> CHECK
+                    CHECK -->|No| REFLECT
+                    REFLECT --> PLAN
+                    CHECK -->|Yes| FINALIZE
+                    FINALIZE --> RETURN
+
+                    style INIT fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style PLAN fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style EXECUTE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style UPDATE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style REASON fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style CHECK fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+                    style REFLECT fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style FINALIZE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style RETURN fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- Memory System -->
+        <div class="diagram-card">
+            <h2>3️⃣ Memory System Architecture</h2>
+            <p class="diagram-title-desc">Dual-layer memory with consolidation and retrieval mechanisms</p>
+            <div class="mermaid">
+                graph TB
+                    INPUT["📥 Input<br/>New Information"]
+                    ST["⚡ Short-Term<br/>Recent Context<br/>In-Memory"]
+                    CACHE["🔄 Cache<br/>Redis"]
+                    LT["💾 Long-Term<br/>Persistent Knowledge<br/>PostgreSQL"]
+                    SEMANTIC["🔍 Semantic<br/>Search"]
+                    RETRIEVAL["📤 Retrieval"]
+                    CONSOLIDATE["🔗 Consolidation<br/>Merge & Summarize"]
+
+                    INPUT --> ST
+                    ST --> CACHE
+                    CACHE --> CONSOLIDATE
+                    CONSOLIDATE --> LT
+
+                    LT --> SEMANTIC
+                    ST --> SEMANTIC
+                    SEMANTIC --> RETRIEVAL
+
+                    INPUT --> RETRIEVAL
+
+                    style ST fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style CACHE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style LT fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style SEMANTIC fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+                    style CONSOLIDATE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- Backend API Integration -->
+        <div class="diagram-card">
+            <h2>4️⃣ Backend API & Service Layer</h2>
+            <p class="diagram-title-desc">FastAPI routes coordinating with business logic services</p>
+            <div class="mermaid">
+                graph TB
+                    CLIENT["👥 Client<br/>Web/API/CLI"]
+                    FASTAPI["⚡ FastAPI<br/>HTTP Routes"]
+                    MIDDLEWARE["🔐 Middleware<br/>Auth/Logging"]
+                    TASKAPI["📋 Tasks API<br/>/api/v1/tasks"]
+                    AGENTAPI["🤖 Agent API<br/>/api/v1/agents"]
+                    TOOLAPI["🔧 Tools API<br/>/api/v1/tools"]
+                    METRICAPI["📊 Metrics API<br/>/api/v1/metrics"]
+
+                    TASKSERVICE["Services<br/>Task Manager"]
+                    AGENTSERVICE["Services<br/>Agent Manager"]
+                    TOOLSERVICE["Services<br/>Tool Manager"]
+                    MONITORSERVICE["Services<br/>Monitor"]
+
+                    AGENT["Agent Core"]
+                    MCPSERVER["MCP Server"]
+                    METRICS["Prometheus"]
+
+                    CLIENT --> FASTAPI
+                    FASTAPI --> MIDDLEWARE
+                    MIDDLEWARE --> TASKAPI
+                    MIDDLEWARE --> AGENTAPI
+                    MIDDLEWARE --> TOOLAPI
+                    MIDDLEWARE --> METRICAPI
+
+                    TASKAPI --> TASKSERVICE
+                    AGENTAPI --> AGENTSERVICE
+                    TOOLAPI --> TOOLSERVICE
+                    METRICAPI --> MONITORSERVICE
+
+                    TASKSERVICE --> AGENT
+                    AGENTSERVICE --> AGENT
+                    TOOLSERVICE --> MCPSERVER
+                    MONITORSERVICE --> METRICS
+
+                    style FASTAPI fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style AGENT fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+                    style MCPSERVER fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- Frontend Integration -->
+        <div class="diagram-card">
+            <h2>5️⃣ Frontend & Real-Time Updates</h2>
+            <p class="diagram-title-desc">React dashboard with WebSocket real-time monitoring</p>
+            <div class="mermaid">
+                graph TB
+                    REACT["🎨 React App<br/>Dashboard"]
+                    PAGES["Pages<br/>Dashboard/Tasks/Monitoring"]
+                    COMPONENTS["Components<br/>UI Elements"]
+                    HOOKS["Custom Hooks<br/>State Management"]
+                    API["API Service<br/>HTTP Client"]
+                    WEBSOCKET["WebSocket<br/>Real-time"]
+
+                    FASTAPI["⚡ FastAPI<br/>Backend"]
+                    AGENT["🤖 Agent<br/>Execution"]
+                    METRICS["📊 Metrics<br/>Prometheus"]
+
+                    REACT --> PAGES
+                    REACT --> COMPONENTS
+                    REACT --> HOOKS
+
+                    PAGES --> API
+                    PAGES --> WEBSOCKET
+                    HOOKS --> API
+
+                    API --> FASTAPI
+                    WEBSOCKET --> FASTAPI
+
+                    FASTAPI --> AGENT
+                    FASTAPI --> METRICS
+
+                    style REACT fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style API fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style WEBSOCKET fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style FASTAPI fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- LLM Integration -->
+        <div class="diagram-card">
+            <h2>6️⃣ LLM Provider Integration</h2>
+            <p class="diagram-title-desc">Multi-provider LLM abstraction layer</p>
+            <div class="mermaid">
+                graph TB
+                    REASONING["🧠 Reasoning<br/>Engine"]
+                    LLMCLIENT["LLM Client<br/>Abstract Interface"]
+
+                    OPENAI["🔶 OpenAI<br/>GPT-4/3.5"]
+                    CLAUDE["🔴 Claude<br/>Anthropic"]
+                    GROQ["⚡ Groq<br/>Fast Inference"]
+                    LOCAL["💻 Local<br/>Private Models"]
+
+                    REASONING --> LLMCLIENT
+                    LLMCLIENT --> OPENAI
+                    LLMCLIENT --> CLAUDE
+                    LLMCLIENT --> GROQ
+                    LLMCLIENT --> LOCAL
+
+                    OPENAI --> API1["OpenAI API"]
+                    CLAUDE --> API2["Claude API"]
+                    GROQ --> API3["Groq API"]
+                    LOCAL --> LOCAL_EXEC["Local Runtime"]
+
+                    style REASONING fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style LLMCLIENT fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+                    style OPENAI fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style CLAUDE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style GROQ fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style LOCAL fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- Database Integration -->
+        <div class="diagram-card">
+            <h2>7️⃣ Data Persistence Layer</h2>
+            <p class="diagram-title-desc">Multi-database strategy for performance and durability</p>
+            <div class="mermaid">
+                graph TB
+                    MEMORY["Memory<br/>System"]
+                    BACKEND["Backend<br/>Services"]
+                    MODELS["Pydantic<br/>Models"]
+
+                    CACHE["🚀 Redis<br/>Cache<br/>Fast Access"]
+                    POSTGRES["💾 PostgreSQL<br/>Primary DB<br/>Persistence"]
+                    SQLALCHEMY["SQLAlchemy<br/>ORM"]
+
+                    MEMORY --> POSTGRES
+                    MEMORY --> CACHE
+
+                    BACKEND --> MODELS
+                    MODELS --> SQLALCHEMY
+
+                    SQLALCHEMY --> POSTGRES
+                    CACHE --> REDIS_CONN["Redis<br/>Connection"]
+
+                    style CACHE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style POSTGRES fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style SQLALCHEMY fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- Core Components Reference -->
+        <div class="diagram-card">
+            <h2>Core Components Reference</h2>
+            <div class="component-grid">
+                <div class="component-item">
+                    <h3>🤖 Agent Core</h3>
+                    <p>Central orchestration engine managing task execution and tool coordination.</p>
+                    <ul class="component-features">
+                        <li>Task parsing</li>
+                        <li>Execution planning</li>
+                        <li>State management</li>
+                        <li>Error handling</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>🧠 Reasoning Engine</h3>
+                    <p>Implements ReAct pattern with multi-step reasoning and self-reflection.</p>
+                    <ul class="component-features">
+                        <li>Thought process</li>
+                        <li>Action selection</li>
+                        <li>Observation parsing</li>
+                        <li>Reflection</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>💾 Memory System</h3>
+                    <p>Dual-layer memory combining context with persistent knowledge.</p>
+                    <ul class="component-features">
+                        <li>Short-term buffer</li>
+                        <li>Long-term storage</li>
+                        <li>Semantic search</li>
+                        <li>Consolidation</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>🔌 MCP Client</h3>
+                    <p>Protocol implementation for discovering and invoking tools.</p>
+                    <ul class="component-features">
+                        <li>Tool discovery</li>
+                        <li>Protocol handling</li>
+                        <li>Session management</li>
+                        <li>Error recovery</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>🔧 MCP Server</h3>
+                    <p>Tool provider with 15+ specialized functions across domains.</p>
+                    <ul class="component-features">
+                        <li>Web tools</li>
+                        <li>Database tools</li>
+                        <li>File operations</li>
+                        <li>Code execution</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>⚡ FastAPI Backend</h3>
+                    <p>REST API layer for external system integration and control.</p>
+                    <ul class="component-features">
+                        <li>Task endpoints</li>
+                        <li>Agent control</li>
+                        <li>WebSocket support</li>
+                        <li>Monitoring</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>🎨 React Frontend</h3>
+                    <p>Real-time dashboard for monitoring and controlling the system.</p>
+                    <ul class="component-features">
+                        <li>Live updates</li>
+                        <li>Task management</li>
+                        <li>Performance metrics</li>
+                        <li>Agent control</li>
+                    </ul>
+                </div>
+
+                <div class="component-item">
+                    <h3>📊 Monitoring Stack</h3>
+                    <p>Observability with metrics collection and visualization.</p>
+                    <ul class="component-features">
+                        <li>Prometheus metrics</li>
+                        <li>Grafana dashboards</li>
+                        <li>Alert rules</li>
+                        <li>Performance tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow Summary -->
+        <div class="diagram-card">
+            <h2>Complete Data Flow</h2>
+            <p class="diagram-title-desc">End-to-end journey of a task through the system</p>
+            <div class="flow-description">
+                <strong>📌 Task Submission → Execution → Completion Flow:</strong><br>
+                <br>
+                ① User submits task via REST API or CLI<br>
+                ② FastAPI validates and routes to Agent Service<br>
+                ③ Agent Core initializes and creates execution plan<br>
+                ④ Reasoning Engine starts ReAct loop<br>
+                ⑤ Agent queries MCP Server for available tools<br>
+                ⑥ Selects and invokes appropriate tool<br>
+                ⑦ Tool result stored in Memory System (short-term + long-term)<br>
+                ⑧ Reasoning continues until goal achieved<br>
+                ⑨ LLM provider (OpenAI/Claude/Groq) assists with reasoning<br>
+                ⑩ Final output generated and returned to API<br>
+                ⑪ Frontend updates in real-time via WebSocket<br>
+                ⑫ Metrics collected for monitoring
+            </div>
+            <div class="mermaid">
+                graph LR
+                    USER["👤 User"] -->|REST/CLI| API["⚡ API<br/>FastAPI"]
+                    API -->|Validate| PARSER["📋 Parser"]
+                    PARSER -->|Route| AGENTCORE["🤖 Agent<br/>Core"]
+
+                    AGENTCORE -->|Plan| PLAN["Plan Task"]
+                    PLAN -->|Execute| REASONING["🧠 Reason"]
+
+                    REASONING -->|Get Tools| MCP["🔌 MCP<br/>Server"]
+                    MCP -->|Tool List| REASON2["Analyze"]
+                    REASON2 -->|Invoke Tool| TOOLS["🔧 Tools"]
+                    TOOLS -->|Result| MEMORY["💾 Memory"]
+
+                    MEMORY -->|Store| REASON3["Reflect"]
+                    REASON3 -->|More?| CHECK{"Done?"}
+
+                    CHECK -->|No| LLMQUERY["🤖 LLM<br/>Provider"]
+                    LLMQUERY -->|Next Step| REASONING
+
+                    CHECK -->|Yes| OUTPUT["📤 Output"]
+                    OUTPUT -->|Return| API
+                    API -->|WebSocket| FRONTEND["🎨 Frontend"]
+                    API -->|Metrics| MONITORING["📊 Monitor"]
+
+                    FRONTEND -->|Display| USER
+
+                    style AGENTCORE fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style REASONING fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+                    style MCP fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <!-- Component Dependencies -->
+        <div class="diagram-card">
+            <h2>Component Dependencies</h2>
+            <div class="info-section">
+                <strong>🔗 Dependency Hierarchy (Top to Bottom):</strong>
+                <ul>
+                    <li><strong>Layer 1 (Client):</strong> Web Browser, CLI, External Systems</li>
+                    <li><strong>Layer 2 (API):</strong> FastAPI Router, WebSocket Handler</li>
+                    <li><strong>Layer 3 (Services):</strong> Task Service, Agent Service, Tool Service</li>
+                    <li><strong>Layer 4 (Core):</strong> Agent, Reasoning, Memory</li>
+                    <li><strong>Layer 5 (Protocol):</strong> MCP Client, MCP Server</li>
+                    <li><strong>Layer 6 (Integration):</strong> LLM Clients, Tool Implementations</li>
+                    <li><strong>Layer 7 (Storage):</strong> PostgreSQL, Redis</li>
+                    <li><strong>Layer 8 (Monitoring):</strong> Prometheus, Grafana</li>
+                </ul>
+            </div>
+
+            <div class="info-section">
+                <strong>📦 Key Integration Points:</strong>
+                <ul>
+                    <li><strong>Agent ↔ Reasoning:</strong> Task execution and strategy</li>
+                    <li><strong>Reasoning ↔ LLM:</strong> Decision making and planning</li>
+                    <li><strong>Agent ↔ MCP Client:</strong> Tool discovery and invocation</li>
+                    <li><strong>MCP Client ↔ MCP Server:</strong> Protocol communication</li>
+                    <li><strong>Agent ↔ Memory:</strong> Context storage and retrieval</li>
+                    <li><strong>Memory ↔ Database:</strong> Persistence and caching</li>
+                    <li><strong>Agent ↔ API:</strong> Task results and status</li>
+                    <li><strong>API ↔ Frontend:</strong> Real-time updates via WebSocket</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📖 For more details, see ARCHITECTURE_DIAGRAM.html and PROJECT_STRUCTURE.md</p>
+            <p style="margin-top: 10px; opacity: 0.8;">Component-based Architecture • Modular Design • Event-Driven • Asynchronous Processing</p>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+        mermaid.contentLoaded();
+    </script>
+</body>
+</html>
