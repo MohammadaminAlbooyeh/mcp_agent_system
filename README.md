@@ -51,6 +51,134 @@ The system will be available at:
 - **Frontend**: http://localhost:3000
 - **Grafana**: http://localhost:3001 (credentials in docker-compose.yml)
 
+## 🔗 System Connection Diagram
+
+### Available Tools & Components
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ Web Search   │  │  Database    │  │   Email      │          │
+│  │ Tool         │  │   Tool       │  │   Tool       │          │
+│  │ (Google)     │  │ (SQL Query)  │  │ (SMTP)       │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  File Read   │  │ File Write   │  │   HTTP       │          │
+│  │    Tool      │  │    Tool      │  │  API Tool    │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ Code Execute │  │ Web Scrape   │  │  Utilities   │          │
+│  │  Tool        │  │    Tool      │  │   Tools      │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                 │
+│                         ▲         ▲                             │
+│                         │         │                             │
+│                    All coordinated by MCP Protocol              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### System Architecture Flow
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                          USER INPUT                            │
+│                    (Web/CLI/API Request)                       │
+└──────────────────────────┬─────────────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│                     REST API (FastAPI)                         │
+│            ⚡ Validates & Routes Requests                      │
+└──────────────────────────┬─────────────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│                      AGENT CORE                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
+│  │  Planner     │  │  Executor    │  │  Reflector   │         │
+│  │ (Task Plan)  │  │ (Run Tools)  │  │ (Evaluate)   │         │
+│  └──────────────┘  └──────────────┘  └──────────────┘         │
+└──────────┬──────────────────────────────────────┬──────────────┘
+           │                                      │
+           ▼                                      ▼
+┌────────────────────────┐          ┌────────────────────────┐
+│   REASONING ENGINE     │          │    MEMORY SYSTEM       │
+│ ┌────────────────────┐ │          │ ┌────────────────────┐ │
+│ │  ReAct Loop        │ │          │ │  Short-Term (RAM)  │ │
+│ │  Chain-of-Thought  │ │          │ │  Long-Term (DB)    │ │
+│ │  Self-Reflection   │ │          │ │  Semantic Search   │ │
+│ └────────────────────┘ │          │ └────────────────────┘ │
+└────────────┬───────────┘          └────────────┬────────────┘
+             │                                   │
+             │        ┌─────────────────────────┘
+             │        │
+             ▼        ▼
+┌────────────────────────────────────────────────────────────────┐
+│                   MCP CLIENT & SERVER                          │
+│         (Tool Discovery & Invocation Protocol)                 │
+└──────────────────────────┬─────────────────────────────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+┌──────────────────┐ ┌──────────────┐ ┌──────────────────┐
+│  WEB TOOLS       │ │ DATABASE     │ │   FILE & EMAIL   │
+│ ┌──────────────┐ │ │   TOOLS      │ │      TOOLS       │
+│ │Search        │ │ │ ┌──────────┐ │ │ ┌──────────────┐ │
+│ │Scrape        │ │ │ │Query     │ │ │ │Read/Write    │ │
+│ │HTTP Request  │ │ │ │Insert    │ │ │ │Send Email    │ │
+│ └──────────────┘ │ │ │Update    │ │ │ │Parse Files   │ │
+└──────────────────┘ │ └──────────┘ │ │ └──────────────┘ │
+                     └──────────────┘ └──────────────────┘
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           │
+                           ▼
+        ┌──────────────────────────────────┐
+        │   LLM PROVIDERS                  │
+        │  ┌────────┐  ┌────────┐ ┌─────┐ │
+        │  │OpenAI  │  │Claude  │ │Groq │ │
+        │  └────────┘  └────────┘ └─────┘ │
+        └──────────────────────────────────┘
+                           │
+                           ▼
+        ┌──────────────────────────────────┐
+        │   DATA STORAGE                   │
+        │  ┌────────────────────────────┐  │
+        │  │ PostgreSQL (Persistence)   │  │
+        │  │ Redis (Cache)              │  │
+        │  └────────────────────────────┘  │
+        └──────────────────────────────────┘
+                           │
+                           ▼
+        ┌──────────────────────────────────┐
+        │  MONITORING & VISUALIZATION      │
+        │  ┌────────────────────────────┐  │
+        │  │ Prometheus (Metrics)       │  │
+        │  │ Grafana (Dashboards)       │  │
+        │  └────────────────────────────┘  │
+        └──────────────────────────────────┘
+```
+
+### Component Interaction Matrix
+
+```
+┌────────────────┬──────────┬───────────┬──────────┬───────────┐
+│   Component    │  Agent   │  Reasoning│ Memory   │   Tools   │
+├────────────────┼──────────┼───────────┼──────────┼───────────┤
+│ Agent Core     │    -     │  Controls │ Updates  │ Invokes   │
+│ Reasoning      │ Receives │     -     │ Queries  │ Decides   │
+│ Memory System  │ Stores   │ Provides  │    -     │ Logs      │
+│ MCP Tools      │ Reports  │ Analyzes  │ Records  │    -      │
+│ LLM Provider   │ Assists  │ Guides    │ Context  │ Evaluates │
+│ API/Frontend   │ Status   │ Metrics   │ Insights │ Display   │
+└────────────────┴──────────┴───────────┴──────────┴───────────┘
+```
+
 ## 📁 Project Architecture
 
 ```
@@ -103,6 +231,80 @@ mcp_agent_system/
 │
 ├── notebooks/           # Jupyter Notebooks
 └── scripts/             # Utility Scripts
+```
+
+## 🧰 Tools & Capabilities Overview
+
+```
+TOOL CATEGORIES & CONNECTIONS
+═══════════════════════════════════════════════════════════
+
+🌐 WEB TOOLS                          📊 DATA TOOLS
+├── Search Web                         ├── Query Database
+├── Scrape Website                     ├── Insert Data
+├── HTTP Requests                      ├── Update Records
+└── Parse HTML/JSON                    └── Delete Data
+         │                                    │
+         ├────────────────┬────────────────────┤
+         │                │                    │
+         ▼                ▼                    ▼
+    ┌─────────────────────────────────────┐
+    │   AGENT REASONING ENGINE            │
+    │   (Decides which tool to use)       │
+    └─────────────────────────────────────┘
+         │                │                    │
+         ├────────────────┼────────────────────┤
+         │                │                    │
+         ▼                ▼                    ▼
+📁 FILE TOOLS              ✉️  EMAIL TOOLS       💻 CODE TOOLS
+├── Read File              ├── Send Email       ├── Execute Code
+├── Write File             ├── Parse Email      ├── Lint Code
+├── Delete File            └── Attach Files     └── Debug
+└── Directory List                              
+         │
+         └────────────────┬────────────────────┘
+                          │
+                    ┌─────▼──────┐
+                    │ RESULTS    │
+                    │ LOGGED     │
+                    └────────────┘
+```
+
+### Tool Connection Example
+
+```
+SAMPLE WORKFLOW: "Search for Python best practices and send report"
+════════════════════════════════════════════════════════════════
+
+Step 1: Agent receives task
+        │
+        ▼
+Step 2: Use Web Search Tool
+        ├─→ Search: "Python best practices"
+        └─→ Returns: [results with URLs]
+        │
+        ▼
+Step 3: Use Web Scrape Tool
+        ├─→ Scrape URLs from Step 2
+        └─→ Returns: [content]
+        │
+        ▼
+Step 4: Agent analyzes with LLM
+        ├─→ Reason about results
+        └─→ Decide: need to send report
+        │
+        ▼
+Step 5: Use File Write Tool
+        ├─→ Create report file
+        └─→ Returns: [file path]
+        │
+        ▼
+Step 6: Use Email Tool
+        ├─→ Send file to recipient
+        └─→ Returns: [success status]
+        │
+        ▼
+COMPLETE ✓
 ```
 
 ## 🛠️ Technology Stack
