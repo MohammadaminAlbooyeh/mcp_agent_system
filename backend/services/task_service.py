@@ -1,8 +1,10 @@
+
 from datetime import datetime
 from backend.models.database import get_session, close_session
 from backend.models.task import TaskModel
 from backend.models.execution import ExecutionModel
 from backend.utils.helpers import generate_id
+from backend.utils.redis_client import get_redis_client
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -10,6 +12,10 @@ logger = get_logger(__name__)
 
 class TaskService:
     async def create_task(self, task_data) -> dict:
+        redis = get_redis_client()
+        cache_key = f"task:{task_data.title}"
+        if redis.exists(cache_key):
+            return redis.get(cache_key)
         session = get_session()
         try:
             task = TaskModel(
@@ -22,8 +28,7 @@ class TaskService:
             )
             session.add(task)
             session.commit()
-            logger.info(f"Created task: {task.id}")
-            return {
+            result = {
                 "id": task.id,
                 "title": task.title,
                 "description": task.description,
@@ -32,14 +37,26 @@ class TaskService:
                 "created_at": task.created_at,
                 "updated_at": task.updated_at,
             }
+            redis.set(cache_key, str(result))
+            logger.info(f"Created task: {task.id}")
+            return result
         finally:
             close_session(session)
 
-    async def list_tasks(self) -> list[dict]:
+    async def list_tasks(self) -> list:
+        redis = get_redis_client()
+        cache_key = "tasks:list"
+        cached = redis.get(cache_key)
+        if cached:
+            import json
+            try:
+                return json.loads(cached)
+            except Exception:
+                pass
         session = get_session()
         try:
             tasks = session.query(TaskModel).all()
-            return [
+            result = [
                 {
                     "id": t.id,
                     "title": t.title,
@@ -51,16 +68,27 @@ class TaskService:
                 }
                 for t in tasks
             ]
+            redis.set(cache_key, str(result))
+            return result
         finally:
             close_session(session)
 
     async def get_task(self, task_id: str) -> dict:
+        redis = get_redis_client()
+        cache_key = f"task:{task_id}"
+        cached = redis.get(cache_key)
+        if cached:
+            import json
+            try:
+                return json.loads(cached)
+            except Exception:
+                pass
         session = get_session()
         try:
             task = session.query(TaskModel).filter(TaskModel.id == task_id).first()
             if not task:
                 return None
-            return {
+            result = {
                 "id": task.id,
                 "title": task.title,
                 "description": task.description,
@@ -69,6 +97,8 @@ class TaskService:
                 "created_at": task.created_at,
                 "updated_at": task.updated_at,
             }
+            redis.set(cache_key, str(result))
+            return result
         finally:
             close_session(session)
 
@@ -107,5 +137,10 @@ class TaskService:
             )
             session.add(exec_entry)
             session.commit()
+            self._invalidate_cache()
         finally:
             close_session(session)
+
+    def _invalidate_cache(self):
+        redis = get_redis_client()
+        redis.delete("tasks:list")

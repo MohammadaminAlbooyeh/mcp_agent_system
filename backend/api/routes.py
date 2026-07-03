@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from backend.api.schemas import (
@@ -8,6 +9,7 @@ from backend.api.schemas import (
 from backend.api.dependencies import get_agent_service, get_task_service
 from backend.services.agent_service import AgentService
 from backend.services.task_service import TaskService
+from backend.utils.helpers import generate_id
 from backend.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -22,6 +24,7 @@ async def _broadcast(channel: str, data: dict):
             await ws.send_json(data)
         except Exception:
             pass
+
 
 _settings_store = {
     "llmProvider": "openai",
@@ -78,6 +81,42 @@ async def list_tools(
 ):
     tools = await agent_service.get_tools()
     return [ToolResponse(name=t.name, description=t.description) for t in tools]
+
+
+@router.post("/executions/execute")
+async def execute_tool(
+    request: dict,
+    agent_service: AgentService = Depends(get_agent_service),
+):
+    tool_name = request.get("name")
+    params = request.get("params", {})
+    if not tool_name:
+        raise HTTPException(status_code=400, detail="Tool name is required")
+    import time
+    start = time.time()
+    try:
+        tools = await agent_service.get_tools()
+        tool_map = {t.name: t for t in tools}
+        tool = tool_map.get(tool_name)
+        if tool is None:
+            raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
+        result = await tool.execute(**params)
+        status = "success"
+    except HTTPException:
+        raise
+    except Exception as e:
+        result = str(e)
+        status = "failed"
+    elapsed = (time.time() - start) * 1000
+    return {
+        "id": f"exec_{datetime.now().timestamp()}",
+        "tool_name": tool_name,
+        "params": params,
+        "result": str(result),
+        "status": status,
+        "duration_ms": elapsed,
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 @router.get("/executions", response_model=list[ExecutionResponse])
