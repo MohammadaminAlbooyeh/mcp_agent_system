@@ -5,6 +5,7 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes import router
+from backend.api.sessions import router as sessions_router
 from backend.api.middleware import setup_middleware
 from backend.models.database import init_db
 from backend.utils.config import AppConfig
@@ -56,6 +57,7 @@ app.add_middleware(
 
 setup_middleware(app)
 app.include_router(router, prefix="/api")
+app.include_router(sessions_router, prefix="/api")
 
 
 @app.get("/metrics")
