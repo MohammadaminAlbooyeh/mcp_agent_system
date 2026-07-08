@@ -44,6 +44,30 @@ async def authorize(
     session_id: str = Query(...),
     gmail_service: GmailOAuthService = Depends(get_gmail_oauth_service),
 ) -> dict:
+    """
+    Get OAuth authorization URL for provider.
+
+    Initiates OAuth 2.0 flow by returning an authorization URL that user
+    should visit in their browser to grant permission.
+
+    Args:
+        provider (str): OAuth provider (currently: "gmail")
+        session_id (str): Session identifier for token storage
+
+    Returns:
+        dict: Authorization URL to redirect user to
+
+    Example Response:
+        ```json
+        {
+            "auth_url": "https://accounts.google.com/o/oauth2/v2/auth?client_id=...",
+            "provider": "gmail"
+        }
+        ```
+
+    Supported Providers:
+    - gmail: Google Gmail API access
+    """
     try:
         if provider != "gmail":
             raise HTTPException(status_code=400, detail=f"Provider '{provider}' not supported")
@@ -63,6 +87,34 @@ async def callback(
     request: CallbackRequest,
     gmail_service: GmailOAuthService = Depends(get_gmail_oauth_service),
 ) -> dict:
+    """
+    Handle OAuth callback and exchange authorization code for access token.
+
+    Called by OAuth provider after user grants permission. Exchanges the
+    authorization code for an access token and refresh token. Tokens are
+    encrypted and stored per session.
+
+    Args:
+        provider (str): OAuth provider (currently: "gmail")
+        request (CallbackRequest): Contains authorization code and session_id
+
+    Returns:
+        dict: Success confirmation with user email
+
+    Example Request:
+        ```json
+        {
+            "code": "4/0AX4XfWh...",
+            "session_id": "sess_123...",
+            "provider": "gmail"
+        }
+        ```
+
+    Token Storage:
+    - Encrypted with ENCRYPTION_KEY from environment
+    - Stored in database per session
+    - Auto-refreshed when expired
+    """
     try:
         if provider != "gmail":
             raise HTTPException(status_code=400, detail=f"Provider '{provider}' not supported")
@@ -92,6 +144,29 @@ async def get_status(
     session_id: str = Query(...),
     gmail_service: GmailOAuthService = Depends(get_gmail_oauth_service),
 ) -> AuthStatusResponse:
+    """
+    Check OAuth authentication status for a provider.
+
+    Returns authentication status including whether token is valid and
+    when it expires. Useful for UI to show auth state and refresh buttons.
+
+    Args:
+        provider (str): OAuth provider (currently: "gmail")
+        session_id (str): Session identifier
+
+    Returns:
+        AuthStatusResponse: Authentication status with expiry info
+
+    Example Response:
+        ```json
+        {
+            "authenticated": true,
+            "user_email": "user@example.com",
+            "is_expired": false,
+            "expires_at": "2024-01-15T10:30:00Z"
+        }
+        ```
+    """
     try:
         if provider != "gmail":
             raise HTTPException(status_code=400, detail=f"Provider '{provider}' not supported")
@@ -116,6 +191,19 @@ async def disconnect(
     session_id: str = Query(...),
     gmail_service: GmailOAuthService = Depends(get_gmail_oauth_service),
 ) -> dict:
+    """
+    Revoke OAuth credentials and disconnect from provider.
+
+    Removes stored access token and refresh token for this session.
+    User will need to re-authenticate to use provider features again.
+
+    Args:
+        provider (str): OAuth provider (currently: "gmail")
+        session_id (str): Session identifier
+
+    Returns:
+        dict: Success confirmation
+    """
     try:
         if provider != "gmail":
             raise HTTPException(status_code=400, detail=f"Provider '{provider}' not supported")
@@ -139,6 +227,19 @@ async def refresh_token(
     session_id: str = Query(...),
     gmail_service: GmailOAuthService = Depends(get_gmail_oauth_service),
 ) -> dict:
+    """
+    Manually refresh OAuth access token.
+
+    Exchanges refresh token for new access token. Usually called automatically
+    when token expires, but can be called manually to ensure fresh token.
+
+    Args:
+        provider (str): OAuth provider (currently: "gmail")
+        session_id (str): Session identifier
+
+    Returns:
+        dict: Success confirmation with refresh status
+    """
     try:
         if provider != "gmail":
             raise HTTPException(status_code=400, detail=f"Provider '{provider}' not supported")

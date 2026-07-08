@@ -43,6 +43,33 @@ async def create_session(
     request: SessionCreateRequest,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> SessionResponse:
+    """
+    Create a new agent session for multi-step task execution.
+
+    Sessions enable:
+    - Persistent state across multiple requests
+    - Memory snapshots for restoration
+    - Pause/resume functionality
+    - Multi-user isolation
+    - TTL-based automatic expiration (default: 24 hours)
+
+    Args:
+        request (SessionCreateRequest): Optional user_id and metadata
+
+    Returns:
+        SessionResponse: New session details with ID and timestamps
+
+    Example:
+        ```json
+        {
+            "user_id": "user@example.com",
+            "metadata": {
+                "workflow": "research",
+                "priority": "high"
+            }
+        }
+        ```
+    """
     try:
         session_id = await session_manager.create_session(
             user_id=request.user_id,
@@ -75,6 +102,18 @@ async def get_session(
     session_id: str,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> SessionResponse:
+    """
+    Retrieve session details including state and memory snapshots.
+
+    Args:
+        session_id (str): Unique session identifier
+
+    Returns:
+        SessionResponse: Current session state, memory, and metadata
+
+    Raises:
+        HTTPException: 404 if session not found or expired
+    """
     try:
         session = await session_manager.get_session(session_id)
         if not session:
@@ -106,6 +145,29 @@ async def update_session_state(
     request: SessionStateRequest,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
+    """
+    Update session state with new data.
+
+    Used during agent execution to persist state changes between steps.
+
+    Args:
+        session_id (str): Session identifier
+        request (SessionStateRequest): State updates to apply
+
+    Returns:
+        dict: Success confirmation
+
+    Example:
+        ```json
+        {
+            "state_updates": {
+                "current_step": 3,
+                "tool_results": {...},
+                "reasoning_trace": [...]
+            }
+        }
+        ```
+    """
     try:
         success = await session_manager.update_session_state(session_id, request.state_updates)
         if not success:
@@ -123,6 +185,17 @@ async def pause_session(
     session_id: str,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
+    """
+    Pause agent execution for a session.
+
+    Allows resuming the session later from the same checkpoint without losing state.
+
+    Args:
+        session_id (str): Session identifier
+
+    Returns:
+        dict: Success confirmation with pause status
+    """
     try:
         success = await session_manager.pause_session(session_id)
         if not success:
@@ -140,6 +213,17 @@ async def resume_session(
     session_id: str,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
+    """
+    Resume execution of a paused session.
+
+    Restores session state and continues from the last checkpoint.
+
+    Args:
+        session_id (str): Session identifier
+
+    Returns:
+        dict: Success confirmation with resume status
+    """
     try:
         success = await session_manager.resume_session(session_id)
         if not success:
@@ -157,6 +241,15 @@ async def complete_session(
     session_id: str,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
+    """
+    Mark a session as complete and finalize execution.
+
+    Args:
+        session_id (str): Session identifier
+
+    Returns:
+        dict: Success confirmation with completion status
+    """
     try:
         success = await session_manager.complete_session(session_id)
         if not success:
@@ -174,6 +267,15 @@ async def delete_session(
     session_id: str,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
+    """
+    Delete a session and clean up all associated resources.
+
+    Args:
+        session_id (str): Session identifier
+
+    Returns:
+        dict: Success confirmation with deletion status
+    """
     try:
         success = await session_manager.cleanup_session(session_id)
         if not success:
@@ -192,6 +294,16 @@ async def list_active_sessions(
     limit: int = 100,
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> List[SessionResponse]:
+    """
+    List all active sessions, optionally filtered by user.
+
+    Args:
+        user_id (str, optional): Filter by specific user
+        limit (int): Maximum sessions to return (default: 100)
+
+    Returns:
+        list[SessionResponse]: List of active sessions with their details
+    """
     try:
         sessions = await session_manager.list_active_sessions(user_id=user_id, limit=limit)
         result = []
@@ -219,6 +331,15 @@ async def list_active_sessions(
 async def cleanup_expired_sessions(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> dict:
+    """
+    Clean up all expired sessions and their resources.
+
+    Removes sessions that have exceeded their TTL. Can be called manually
+    or scheduled as a background task.
+
+    Returns:
+        dict: Cleanup results including count of deleted sessions
+    """
     try:
         count = await session_manager.cleanup_expired_sessions()
         return {
